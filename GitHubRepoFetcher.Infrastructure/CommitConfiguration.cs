@@ -15,11 +15,13 @@ public sealed class CommitConfiguration : IEntityTypeConfiguration<Commit>
         builder.HasKey(p => p.Id);
 
         builder
+            .HasIndex(p => new { p.UserName, p.RepositoryName, p.Sha })
+            .IsUnique();
+
+        builder
             .Property(p => p.Id)
             .ValueGeneratedOnAdd()
             .HasValueGenerator<SequentialGuidValueGenerator>();
-
-        //TODO: add indexes after clarification; repo data
 
         builder
            .Property(p => p.Sha)
