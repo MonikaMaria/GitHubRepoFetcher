@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35521.163 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubRepoFetcher.Application", "GitHubRepoFetcher.Application\GitHubRepoFetcher.Application.csproj", "{20CB76B9-AA92-4091-8454-F4D74DC811B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubRepoFetcher.Domain", "GitHubRepoFetcher.Domain\GitHubRepoFetcher.Domain.csproj", "{BF01C398-4113-4B59-B499-4118F7F94740}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubRepoFetcher.Infrastructure", "GitHubRepoFetcher.Infrastructure\GitHubRepoFetcher.Infrastructure.csproj", "{8B6C6A1D-73FD-41FD-8D47-D00D000DE2A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{20CB76B9-AA92-4091-8454-F4D74DC811B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20CB76B9-AA92-4091-8454-F4D74DC811B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20CB76B9-AA92-4091-8454-F4D74DC811B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20CB76B9-AA92-4091-8454-F4D74DC811B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF01C398-4113-4B59-B499-4118F7F94740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF01C398-4113-4B59-B499-4118F7F94740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF01C398-4113-4B59-B499-4118F7F94740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF01C398-4113-4B59-B499-4118F7F94740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B6C6A1D-73FD-41FD-8D47-D00D000DE2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B6C6A1D-73FD-41FD-8D47-D00D000DE2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B6C6A1D-73FD-41FD-8D47-D00D000DE2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B6C6A1D-73FD-41FD-8D47-D00D000DE2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
