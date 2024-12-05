@@ -20,8 +20,7 @@ public sealed class CommitConfiguration : IEntityTypeConfiguration<Commit>
 
         builder
             .Property(p => p.Id)
-            .ValueGeneratedOnAdd()
-            .HasValueGenerator<SequentialGuidValueGenerator>();
+            .ValueGeneratedNever();
 
         builder
            .Property(p => p.Sha)
