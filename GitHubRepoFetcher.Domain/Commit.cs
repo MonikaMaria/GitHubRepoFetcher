@@ -8,13 +8,8 @@ public class Commit
     public string Sha { get; private set; }
     public string Message { get; private set; }
     public string CommitterName { get; private set; }
-    public string CommiterEmail {  get; private set; }
+    public string CommitterEmail { get; private set; }
     public DateTimeOffset CommittedAt { get; private set; }
-
-    public Commit()
-    {
-
-    }
 
     public static Commit Create(string userName, string repositoryName, string sha, string message, string committerName, string committerEmail, DateTimeOffset committedAt)
     {
@@ -29,7 +24,7 @@ public class Commit
         Sha = sha;
         Message = message;
         CommitterName = committerName;
-        CommiterEmail = committerEmail;
+        CommitterEmail = committerEmail;
         CommittedAt = committedAt;
     }
 }

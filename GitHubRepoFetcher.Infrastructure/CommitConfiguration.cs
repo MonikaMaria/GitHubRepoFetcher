@@ -2,7 +2,6 @@
 using GitHubRepoFetcher.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace GitHubRepoFetcher.Infrastructure;
 

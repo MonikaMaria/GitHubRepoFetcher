@@ -16,6 +16,6 @@ public interface IGitHubApi
     [Get("/repos/{userName}/{repositoryName}")]
     Task<ApiResponse<string>> GetRepositoryAsync(string userName, string repositoryName, CancellationToken cancellationToken);
 
-    [Get("/repos/{userName}/{repositoryName}/commits?per_page=10")] // Parameterize page size if needed
+    [Get("/repos/{userName}/{repositoryName}/commits?per_page=100")] // Parameterize page size if needed
     Task<ApiResponse<IEnumerable<GitHubCommitItem>>> GetCommitsAsync(string userName, string repositoryName, int page, CancellationToken cancellationToken);
 }

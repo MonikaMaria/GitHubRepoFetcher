@@ -1,5 +1,4 @@
-﻿using GitHubRepoFetcher.Domain;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace GitHubRepoFetcher.Infrastructure;
 

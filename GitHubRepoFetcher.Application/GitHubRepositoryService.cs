@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using EFCore.BulkExtensions;
 using GitHubRepoFetcher.Domain;
 using GitHubRepoFetcher.Infrastructure;
+using static System.Text.RegularExpressions.Regex;
 
 namespace GitHubRepoFetcher.Application;
 
@@ -52,7 +53,10 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
                     for (int page = 2; page <= lastPageNumber; page++)
                     {
                         var currentPageResult = await api.GetCommitsAsync(userName, repositoryName, page, cancellationToken);
-                        commits.AddRange(currentPageResult.Content);
+                        if (currentPageResult.IsSuccessful)
+                        {
+                            commits.AddRange(currentPageResult.Content);
+                        }
                     }
                 }
             }
@@ -61,16 +65,15 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
         return commits;
     }
 
-    private int? GetLastPageNumber(string linkHeaderStr)
+    private int? GetLastPageNumber(string linkHeaderValue)
     {
-        if (!string.IsNullOrWhiteSpace(linkHeaderStr))
-        {
-            var lastPageMatch = Regex.Match(linkHeaderStr, @"(?<=page=)(\d+)(?=>; rel=""last"")", RegexOptions.IgnoreCase);
-            int lastPageNumber = Convert.ToInt32(lastPageMatch.Value);
-            return lastPageNumber;
-        }
+        if (string.IsNullOrWhiteSpace(linkHeaderValue)) 
+            return null;
 
-        return null;
+        var lastPageMatch = Match(linkHeaderValue, @"(?<=page=)(\d+)(?=>; rel=""last"")", RegexOptions.IgnoreCase);
+        var lastPageNumber = Convert.ToInt32(lastPageMatch.Value);
+        return lastPageNumber;
+
     }
 
     public async Task SaveCommits(string userName, string repositoryName, IEnumerable<GitHubCommitItem> gitHubCommits,
