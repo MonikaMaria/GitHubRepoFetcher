@@ -1,52 +1,60 @@
 ﻿using GitHubRepoFetcher.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace GitHubRepoFetcher.Application
+namespace GitHubRepoFetcher.Application;
+
+public sealed class HostedLifecycleService(IServiceScopeFactory scopeFactory) : IHostedService
 {
-    public sealed class HostedLifecycleService(
-        DatabaseContext dbContext,
-        IMainLoopService mainLoopService,
-        IUIHandler uiHandler,
-        IGitHubRepositoryService gitHubRepositoryService)
-        : IHostedService
+    private AsyncServiceScope _asyncServiceScope;
+
+    private DatabaseContext _dbContext = null!;
+    private IMainLoopService _mainLoopService = null!;
+    private IUIHandler _uiHandler = null!;
+
+    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
-        async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        _asyncServiceScope = scopeFactory.CreateAsyncScope();
+        _dbContext = _asyncServiceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
+        _mainLoopService = _asyncServiceScope.ServiceProvider.GetRequiredService<IMainLoopService>();
+        _uiHandler = _asyncServiceScope.ServiceProvider.GetRequiredService<IUIHandler>();
+
+        _uiHandler.DisplayTitle();
+        _uiHandler.DisplayInitializing();
+
+        await _dbContext.Database.MigrateAsync(cancellationToken);
+
+        await RunLoop(cancellationToken);
+    }
+
+    private async Task RunLoop(CancellationToken cancellationToken)
+    {
+        var userName = string.Empty;
+        var repositoryName = string.Empty;
+
+        while (true)
         {
-            uiHandler.DisplayTitle();
-            uiHandler.DisplayInitializing();
+            _uiHandler.DisplayDescription();
 
-            await dbContext.Database.MigrateAsync(cancellationToken);
+            userName = await _mainLoopService.GetValidatedUserName(userName, cancellationToken);
+            repositoryName = await _mainLoopService.GetValidatedRepositoryName(userName, repositoryName, cancellationToken);
 
-            await RunLoop(cancellationToken);
+            var gitHubCommits = (await _mainLoopService.GetCommits(userName, repositoryName, cancellationToken)).ToArray();
+
+            _mainLoopService.DisplayResult(gitHubCommits, repositoryName);
+
+            await _mainLoopService.SaveData(userName, repositoryName, gitHubCommits, cancellationToken);
+
+            _uiHandler.DisplayLine();
+
+            userName = string.Empty;
+            repositoryName = string.Empty;
         }
+    }
 
-        private async Task RunLoop(CancellationToken cancellationToken)
-        {
-            var userName = string.Empty;
-            var repositoryName = string.Empty;
-
-            while (true)
-            {
-                uiHandler.DisplayDescription();
-
-                userName = await mainLoopService.GetValidatedUserName(userName, cancellationToken);
-                repositoryName = await mainLoopService.GetValidatedRepositoryName(userName, repositoryName, cancellationToken);
-
-                var gitHubCommits = (await mainLoopService.GetCommits(userName, repositoryName, cancellationToken)).ToArray();
-
-                mainLoopService.DisplayResult(gitHubCommits, repositoryName);
-
-                await mainLoopService.SaveData(userName, repositoryName, gitHubCommits, cancellationToken);
-
-                userName = string.Empty;
-                repositoryName = string.Empty;
-            }
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _asyncServiceScope.DisposeAsync();
     }
 }

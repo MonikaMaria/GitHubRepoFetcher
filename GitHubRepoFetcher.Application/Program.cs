@@ -32,13 +32,12 @@ IHost CreateConfiguredBuilder(string[] strings)
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"));
 
             services.AddTransient<IGitHubRepositoryService, GitHubRepositoryService>();
-            services.AddSingleton<IMainLoopService, MainLoopService>();
-            services.AddSingleton<IUIHandler, UIHandler>();
+            services.AddTransient<IUIHandler, UIHandler>();
+            services.AddTransient<IMainLoopService, MainLoopService>();
 
             services.AddDbContext<DatabaseContext>((sp, options) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-
                 var migrationAssemblyName = typeof(DatabaseContext).GetTypeInfo().Assembly.GetName().Name;
                 var connectionString = config.GetSection("Database")["ConnectionString"];
                 options.UseLoggerFactory(new LoggerFactory());
