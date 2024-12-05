@@ -31,7 +31,9 @@ IHost CreateConfiguredBuilder(string[] strings)
                 .AddRefitClient<IGitHubApi>()
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"));
 
-            services.AddTransient<IGitHubRepositoryService, GitHubRepositoryService>(); 
+            services.AddTransient<IGitHubRepositoryService, GitHubRepositoryService>();
+            services.AddSingleton<IMainLoopService, MainLoopService>();
+            services.AddSingleton<IUIHandler, UIHandler>();
 
             services.AddDbContext<DatabaseContext>((sp, options) =>
             {

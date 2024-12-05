@@ -14,8 +14,6 @@ public interface IGitHubRepositoryService
 
     Task<IEnumerable<GitHubCommitItem>> GetGitHubCommitsAsync(string userName, string repositoryName, CancellationToken cancellationToken);
 
-    IOrderedEnumerable<CommitDisplayModel> MapCommitsToDisplay(IEnumerable<GitHubCommitItem> gitHubCommits, string repositoryName);
-    
     Task SaveCommits(string userName, string repositoryName, IEnumerable<GitHubCommitItem> gitHubCommits, CancellationToken cancellationToken);
 }
 
@@ -31,19 +29,6 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
     {
         var response = await api.GetUserAsync(userName, cancellationToken);
         return response.IsSuccessful;
-    }
-
-    public IOrderedEnumerable<CommitDisplayModel> MapCommitsToDisplay(IEnumerable<GitHubCommitItem> gitHubCommits, string repositoryName)
-    {
-        return gitHubCommits.Select(c => 
-                new CommitDisplayModel(
-                    RepositoryName: repositoryName,
-                    Sha: c.Sha,
-                    Message: c.Commit.Message,
-                    CommitterName: c.Commit.Committer.Name,
-                    CommittedAt: c.Commit.Committer.Date)
-            )
-            .OrderByDescending(c => c.CommittedAt);
     }
 
     public async Task<IEnumerable<GitHubCommitItem>> GetGitHubCommitsAsync(string userName, string repositoryName,
@@ -91,27 +76,14 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
     public async Task SaveCommits(string userName, string repositoryName, IEnumerable<GitHubCommitItem> gitHubCommits,
         CancellationToken cancellationToken)
     {
-        var mappedCommits = MapGitHubCommitsToEntities(userName, repositoryName, gitHubCommits);
+        var mappedCommits = gitHubCommits.MapToEntities(userName, repositoryName);
 
         await dbContext.BulkInsertOrUpdateAsync(mappedCommits, 
             cfg =>
             {
-                cfg.UpdateByProperties = new List<string> { nameof(Commit.UserName), nameof(Commit.RepositoryName), nameof(Commit.Sha) };
-                cfg.PropertiesToExcludeOnUpdate = new List<string> { nameof(Commit.Id) };
+                cfg.UpdateByProperties = [nameof(Commit.UserName), nameof(Commit.RepositoryName), nameof(Commit.Sha)];
+                cfg.PropertiesToExcludeOnUpdate = [nameof(Commit.Id)];
             },
             cancellationToken: cancellationToken);
-    }
-
-    private IEnumerable<Commit> MapGitHubCommitsToEntities(string userName, string repositoryName, IEnumerable<GitHubCommitItem> gitHubCommits)
-    {
-        return gitHubCommits.Select(c =>
-            Commit.Create(
-                userName: userName,
-                repositoryName: repositoryName,
-                sha: c.Sha,
-                message: c.Commit.Message,
-                committerName: c.Commit.Committer.Name,
-                committerEmail: c.Commit.Committer.Email,
-                committedAt: c.Commit.Committer.Date));
     }
 }
