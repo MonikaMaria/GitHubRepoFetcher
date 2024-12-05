@@ -32,8 +32,12 @@ public sealed class CommitConfiguration : IEntityTypeConfiguration<Commit>
             .HasMaxLength(FieldLengths.Commit.Message);
 
         builder
-            .Property(p => p.Committer)
-            .HasMaxLength(FieldLengths.Commit.Committer);
+            .Property(p => p.CommitterName)
+            .HasMaxLength(FieldLengths.Commit.CommitterName);
+
+        builder
+            .Property(p => p.CommitterName)
+            .HasMaxLength(FieldLengths.Commit.CommitterEmail);
 
     }
 }
