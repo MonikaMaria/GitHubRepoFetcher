@@ -26,10 +26,6 @@ public sealed class CommitConfiguration : IEntityTypeConfiguration<Commit>
            .HasMaxLength(FieldLengths.Commit.Sha);
 
         builder
-            .Property(p => p.Message)
-            .HasMaxLength(FieldLengths.Commit.Message);
-
-        builder
             .Property(p => p.CommitterName)
             .HasMaxLength(FieldLengths.Commit.CommitterName);
 
