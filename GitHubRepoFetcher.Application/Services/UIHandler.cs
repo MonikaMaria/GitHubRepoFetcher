@@ -1,6 +1,6 @@
 ﻿using Spectre.Console;
 
-namespace GitHubRepoFetcher.Application;
+namespace GitHubRepoFetcher.Application.Services;
 
 public interface IUIHandler
 {

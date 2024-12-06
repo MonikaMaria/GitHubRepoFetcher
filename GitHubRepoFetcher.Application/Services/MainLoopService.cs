@@ -1,4 +1,4 @@
-﻿namespace GitHubRepoFetcher.Application;
+﻿namespace GitHubRepoFetcher.Application.Services;
 
 public interface IMainLoopService
 {

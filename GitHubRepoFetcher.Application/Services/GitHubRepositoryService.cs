@@ -5,7 +5,7 @@ using GitHubRepoFetcher.Domain;
 using GitHubRepoFetcher.Infrastructure;
 using static System.Text.RegularExpressions.Regex;
 
-namespace GitHubRepoFetcher.Application;
+namespace GitHubRepoFetcher.Application.Services;
 
 public interface IGitHubRepositoryService
 {
@@ -67,7 +67,7 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
 
     private int? GetLastPageNumber(string linkHeaderValue)
     {
-        if (string.IsNullOrWhiteSpace(linkHeaderValue)) 
+        if (string.IsNullOrWhiteSpace(linkHeaderValue))
             return null;
 
         var lastPageMatch = Match(linkHeaderValue, @"(?<=page=)(\d+)(?=>; rel=""last"")", RegexOptions.IgnoreCase);
@@ -81,7 +81,7 @@ public class GitHubRepositoryService(DatabaseContext dbContext, IGitHubApi api) 
     {
         var mappedCommits = gitHubCommits.MapToEntities(userName, repositoryName);
 
-        await dbContext.BulkInsertOrUpdateAsync(mappedCommits, 
+        await dbContext.BulkInsertOrUpdateAsync(mappedCommits,
             cfg =>
             {
                 cfg.UpdateByProperties = [nameof(Commit.UserName), nameof(Commit.RepositoryName), nameof(Commit.Sha)];

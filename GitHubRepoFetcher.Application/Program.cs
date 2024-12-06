@@ -7,6 +7,7 @@ using Refit;
 using GitHubRepoFetcher.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using GitHubRepoFetcher.Application.Services;
 
 //RefitSettings settings = new()
 //{
