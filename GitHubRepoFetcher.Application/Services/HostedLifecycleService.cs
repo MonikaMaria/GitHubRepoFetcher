@@ -1,5 +1,6 @@
 ﻿using GitHubRepoFetcher.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,9 +24,32 @@ public sealed class HostedLifecycleService(IServiceScopeFactory scopeFactory) : 
         _uiHandler.DisplayTitle();
         _uiHandler.DisplayInitializing();
 
+        if (CheckAccessTokenSet(out var authToken)) 
+            return;
+
+        SetBearerToken(authToken);
+
         await _dbContext.Database.MigrateAsync(cancellationToken);
 
         await RunLoop(cancellationToken);
+    }
+
+    private bool CheckAccessTokenSet(out string authToken)
+    {
+        var config = _asyncServiceScope.ServiceProvider.GetRequiredService<IConfiguration>();
+        authToken = config.GetSection("GitHub")["AccessToken"] ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(authToken))
+        {
+            _uiHandler.DisplayAuthorizationInfo();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void SetBearerToken(string authToken)
+    {
+        AuthBearerTokenFactory.SetBearerTokenGetterFunc(_ => Task.FromResult(authToken));
     }
 
     private async Task RunLoop(CancellationToken cancellationToken)
@@ -37,14 +61,14 @@ public sealed class HostedLifecycleService(IServiceScopeFactory scopeFactory) : 
         {
             _uiHandler.DisplayDescription();
 
-            userName = await _mainLoopService.GetValidatedUserName(userName, cancellationToken);
-            repositoryName = await _mainLoopService.GetValidatedRepositoryName(userName, repositoryName, cancellationToken);
+            userName = await _mainLoopService.GetValidatedUserNameAsync(userName, cancellationToken);
+            repositoryName = await _mainLoopService.GetValidatedRepositoryNameAsync(userName, repositoryName, cancellationToken);
 
-            var gitHubCommits = (await _mainLoopService.GetCommits(userName, repositoryName, cancellationToken)).ToArray();
+            var gitHubCommits = (await _mainLoopService.GetCommitsAsync(userName, repositoryName, cancellationToken)).ToArray();
 
             _mainLoopService.DisplayResult(gitHubCommits, repositoryName);
 
-            await _mainLoopService.SaveData(userName, repositoryName, gitHubCommits, cancellationToken);
+            await _mainLoopService.SaveDataAsync(userName, repositoryName, gitHubCommits, cancellationToken);
 
             _uiHandler.DisplayLine();
 

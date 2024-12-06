@@ -5,14 +5,17 @@ namespace GitHubRepoFetcher.Application.Services;
 public interface IUIHandler
 {
     void DisplayTitle();
+    void DisplayAuthorizationInfo();
     string DisplayUserNamePrompt();
     string DisplayRepositoryNamePrompt();
     void DisplayInitializing();
+    void DisplayFetchingData();
     void DisplayDescription();
     void DisplayShortSeparator();
     void DisplayResultsHeader();
     void DisplayResultsLegend();
-    void DisplayCommits(IOrderedEnumerable<CommitDisplayModel>? commitsToDisplay);
+    void DisplayCommits(IEnumerable<CommitDisplayModel>? commitsToDisplay);
+    void DisplayCommitsCount(int count);
     void DisplayLine();
     void DisplayUserNameError(string userName);
     void DisplayRepositoryNameError(string repositoryName);
@@ -32,6 +35,11 @@ public class UIHandler : IUIHandler
         AnsiConsole.Write(titleRule);
     }
 
+    public void DisplayAuthorizationInfo()
+    {
+        AnsiConsole.MarkupLine("[red]Authorization token not set.[/]");
+    }
+
     public string DisplayUserNamePrompt()
     {
         return AnsiConsole.Prompt(new TextPrompt<string>("[lightseagreen]GitHub user name:[/]"));
@@ -45,6 +53,11 @@ public class UIHandler : IUIHandler
     public void DisplayInitializing()
     {
         AnsiConsole.MarkupLine("[yellow]Initializing...[/]");
+    }
+
+    public void DisplayFetchingData()
+    {
+        AnsiConsole.MarkupLine("[yellow]Fetching data...[/]");
     }
 
     public void DisplayDescription()
@@ -67,9 +80,9 @@ public class UIHandler : IUIHandler
         AnsiConsole.MarkupLine("[gray][[repository name]]/[[sha]]: message [[committer]][/]");
     }
 
-    public void DisplayCommits(IOrderedEnumerable<CommitDisplayModel>? commitsToDisplay)
+    public void DisplayCommits(IEnumerable<CommitDisplayModel>? commitsToDisplay)
     {
-        var commits = (commitsToDisplay ?? Enumerable.Empty<CommitDisplayModel>()).ToArray();
+        var commits = (commitsToDisplay ?? []).ToArray();
         if (commits.Any())
         {
             foreach (var commit in commits)
@@ -83,6 +96,11 @@ public class UIHandler : IUIHandler
         }
     }
 
+    public void DisplayCommitsCount(int count)
+    {
+        AnsiConsole.MarkupLine($"[yellow]Commits fetched: {count}[/]");
+    }
+
     public void DisplayLine()
     {
         AnsiConsole.Write(new Rule());
@@ -90,13 +108,13 @@ public class UIHandler : IUIHandler
 
     public void DisplayUserNameError(string userName)
     {
-        AnsiConsole.MarkupLine($"[red3]User[/] [yellow]{userName}[/] [red3]does not exist.[/]");
+        AnsiConsole.MarkupLine($"[red]User[/] [yellow]{userName}[/] [red]does not exist.[/]");
     }
 
     public void DisplayRepositoryNameError(string repositoryName)
     {
         AnsiConsole.MarkupLine(
-            $"[red3]Repository[/] [yellow]{repositoryName}[/] [red3]does not exist.[/]");
+            $"[red]Repository[/] [yellow]{repositoryName}[/] [red]does not exist.[/]");
     }
 
     public void DisplaySavingData()

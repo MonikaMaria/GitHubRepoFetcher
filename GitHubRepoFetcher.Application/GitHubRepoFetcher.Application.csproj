@@ -5,6 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>c5a15088-8ec5-4bbe-a04c-d6dcfab012d9</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

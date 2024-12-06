@@ -2,24 +2,21 @@
 
 public interface IMainLoopService
 {
-    Task<string> GetValidatedUserName(string inputUserName,
-        CancellationToken cancellationToken);
+    Task<string> GetValidatedUserNameAsync(string inputUserName, CancellationToken cancellationToken);
 
-    Task<string> GetValidatedRepositoryName(string inputUserName,
-        string inputRepositoryName, CancellationToken cancellationToken);
+    Task<string> GetValidatedRepositoryNameAsync(string inputUserName, string inputRepositoryName, CancellationToken cancellationToken);
 
-    Task<IEnumerable<GitHubCommitItem>> GetCommits(string userName, string repositoryName,
-        CancellationToken cancellationToken);
+    Task<IEnumerable<GitHubCommitItem>> GetCommitsAsync(string userName, string repositoryName, CancellationToken cancellationToken);
 
     void DisplayResult(IEnumerable<GitHubCommitItem> commits, string repositoryName);
 
-    Task SaveData(string userName, string repositoryName, IEnumerable<GitHubCommitItem> commits, CancellationToken cancellationToken);
+    Task SaveDataAsync(string userName, string repositoryName, IEnumerable<GitHubCommitItem> commits, CancellationToken cancellationToken);
 }
 
 public sealed class MainLoopService(IGitHubRepositoryService gitHubRepositoryService, IUIHandler uiHandler)
     : IMainLoopService
 {
-    public async Task<string> GetValidatedUserName(string inputUserName, CancellationToken cancellationToken)
+    public async Task<string> GetValidatedUserNameAsync(string inputUserName, CancellationToken cancellationToken)
     {
         while (string.IsNullOrEmpty(inputUserName))
         {
@@ -36,7 +33,7 @@ public sealed class MainLoopService(IGitHubRepositoryService gitHubRepositorySer
         return inputUserName;
     }
 
-    public async Task<string> GetValidatedRepositoryName(string inputUserName, string inputRepositoryName,
+    public async Task<string> GetValidatedRepositoryNameAsync(string inputUserName, string inputRepositoryName,
         CancellationToken cancellationToken)
     {
         while (string.IsNullOrEmpty(inputRepositoryName))
@@ -56,9 +53,10 @@ public sealed class MainLoopService(IGitHubRepositoryService gitHubRepositorySer
         return inputRepositoryName;
     }
 
-    public async Task<IEnumerable<GitHubCommitItem>> GetCommits(string userName, string repositoryName,
+    public async Task<IEnumerable<GitHubCommitItem>> GetCommitsAsync(string userName, string repositoryName,
         CancellationToken cancellationToken)
     {
+        uiHandler.DisplayFetchingData();
         return await gitHubRepositoryService.GetGitHubCommitsAsync(userName, repositoryName, cancellationToken);
     }
 
@@ -69,17 +67,19 @@ public sealed class MainLoopService(IGitHubRepositoryService gitHubRepositorySer
         uiHandler.DisplayResultsLegend();
         uiHandler.DisplayShortSeparator();
 
-        var commitsToDisplay = commits.MapToCommitsToDisplay(repositoryName);
+        var commitsToDisplay = commits.MapToCommitsToDisplay(repositoryName).ToArray();
         uiHandler.DisplayCommits(commitsToDisplay);
 
         uiHandler.DisplayShortSeparator();
+        uiHandler.DisplayCommitsCount(commitsToDisplay.Length);
+        uiHandler.DisplayShortSeparator();
     }
 
-    public async Task SaveData(string userName, string repositoryName, IEnumerable<GitHubCommitItem> commits,
+    public async Task SaveDataAsync(string userName, string repositoryName, IEnumerable<GitHubCommitItem> commits,
         CancellationToken cancellationToken)
     {
         uiHandler.DisplaySavingData();
-        await gitHubRepositoryService.SaveCommits(userName, repositoryName, commits, cancellationToken);
+        await gitHubRepositoryService.SaveCommitsAsync(userName, repositoryName, commits, cancellationToken);
         uiHandler.DisplayDataSaved();
     }
 }

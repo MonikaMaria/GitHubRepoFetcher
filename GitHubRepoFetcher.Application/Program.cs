@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using GitHubRepoFetcher.Application.Services;
 
-//RefitSettings settings = new()
-//{
-//    AuthorizationHeaderValueGetter = (message, cancellationToken) => GetTokenAsync() 
-//}
+RefitSettings refitSettings = new()
+{
+    AuthorizationHeaderValueGetter = (_, cancellationToken) => AuthBearerTokenFactory.GetBearerTokenAsync(cancellationToken)
+};
 
 var host = CreateConfiguredBuilder(args);
 host.Start();
@@ -20,27 +20,35 @@ host.Start();
 IHost CreateConfiguredBuilder(string[] strings)
 {
     return Host.CreateDefaultBuilder(strings)
-        .ConfigureAppConfiguration((context, config) =>
+        .ConfigureAppConfiguration((_, config) =>
         {
-            config.AddJsonFile("appsettings.json", true, true);
+            config.AddJsonFile(path: "appsettings.json", optional: true, reloadOnChange: true);
+            config.AddUserSecrets<Program>();
             config.AddCommandLine(strings);
         })
         .ConfigureLogging((context, config) => config.AddConfiguration(context.Configuration.GetSection("Logging")))
-        .ConfigureServices(services =>
+        .ConfigureServices((context, services) =>
         {
+            var connectionString = context.Configuration.GetSection("Database")["ConnectionString"];
+            var gitHubBaseAddress = context.Configuration.GetSection("GitHub")["BaseAddress"];
+
             services
-                .AddRefitClient<IGitHubApi>()
-                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"));
+                .AddRefitClient<IGitHubApiClient>(refitSettings)
+                .ConfigureHttpClient(c =>
+                {
+                    if (gitHubBaseAddress != null)
+                    {
+                        c.BaseAddress = new Uri(gitHubBaseAddress);
+                    }
+                });
 
             services.AddTransient<IGitHubRepositoryService, GitHubRepositoryService>();
             services.AddTransient<IUIHandler, UIHandler>();
             services.AddTransient<IMainLoopService, MainLoopService>();
 
-            services.AddDbContext<DatabaseContext>((sp, options) =>
+            services.AddDbContext<DatabaseContext>((_, options) =>
             {
-                var config = sp.GetRequiredService<IConfiguration>();
                 var migrationAssemblyName = typeof(DatabaseContext).GetTypeInfo().Assembly.GetName().Name;
-                var connectionString = config.GetSection("Database")["ConnectionString"];
                 options.UseLoggerFactory(new LoggerFactory());
                 options.UseSqlServer(connectionString,
                     sqlOptions => { sqlOptions.MigrationsAssembly(migrationAssemblyName); });

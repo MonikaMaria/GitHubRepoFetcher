@@ -4,11 +4,11 @@ namespace GitHubRepoFetcher.Application;
 
 [Headers(
     "User-Agent: GitHubRepoFetcher",
-    //"Authorization: Bearer",
+    "Authorization: Bearer",
     "Accept: application/vnd.github+json", 
     "X-GitHub-Api-Version: 2022-11-28"
 )]
-public interface IGitHubApi
+public interface IGitHubApiClient
 {
     [Get("/users/{userName}")]
     Task<ApiResponse<string>> GetUserAsync(string userName, CancellationToken cancellationToken);
